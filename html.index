@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🎁 Birthday Surprise</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #ffe6f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      overflow-x: hidden;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      font-size: 18px;
+      border: 2px solid #d63384;
+      border-radius: 10px;
+      outline: none;
+    }
+
+    button {
+      margin: 10px 5px;
+      padding: 10px 20px;
+      font-size: 18px;
+      background: #d63384;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .link-box {
+      margin-top: 20px;
+      background: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      display: none;
+    }
+
+    .gift-box {
+      font-size: 100px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      display: none;
+    }
+
+    .gift-box:hover {
+      transform: scale(1.1);
+    }
+
+    .message-box {
+      max-width: 90%;
+      background: white;
+      color: #444;
+      font-size: 20px;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin-top: 20px;
+      display: none;
+      min-height: 80px;
+    }
+
+    #navButtons {
+      display: none;
+      margin-top: 15px;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: #ff69b4;
+      animation: fall 3s linear infinite;
+      top: -10px;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(110vh) rotateZ(360deg);
+      }
+    }
+
+    #titleText {
+      color: #d63384;
+      font-size: 26px;
+      margin-top: 15px;
+      display: none;
+    }
+
+    #friendPic {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 50%;
+      margin-top: 20px;
+      display: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Name input area -->
+  <div id="input-area">
+    <h1>🎉 Enter your friend's name</h1>
+    <input type="text" id="nameInput" placeholder="e.g. Bablu"/>
+    <br/>
+    <button onclick="generateLink()">Generate Link</button>
+    <div class="link-box" id="linkBox">
+      🎁 Share this link:<br>
+      <a id="generatedLink" href="#" target="_blank"></a>
+    </div>
+  </div>
+
+  <!-- Gift box -->
+  <div class="gift-box" id="gift">🎁</div>
+
+  <!-- Friend Image -->
+  <img id="friendPic" src="suma.jpg" alt="Friend"/>
+
+  <!-- Happy Birthday Name -->
+  <h2 id="titleText"></h2>
+
+  <!-- Message Box -->
+  <div class="message-box" id="messageBox"></div>
+
+  <!-- Navigation Buttons -->
+  <div id="navButtons">
+    <button onclick="prevMessage()">⬅️ Previous</button>
+    <button onclick="nextMessage()">Next ➡️</button>
+  </div>
+
+  <!-- Background music -->
+  <audio id="bgMusic" src="happy.mp3"></audio>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const name = params.get('name');
+
+    const messages = [
+      "Happy Birthday to my officially licensed jogra partner! 😜",
+      "Tor loge jodi ami kunudin na mati taile amar kache dinta osompurno lage —",
+      "Amra Jogra kori, abar ek second e mishi jai.",
+      "Ami chai tui amar loge always oula jogra kor, maya o korich! 😂",
+      "May your day be full of cake, gifts, and no fight with me (at least today)! 💝"
+    ];
+
+    let currentIndex = 0;
+    let typingIndex = 0;
+    let typingInterval;
+
+    const inputArea = document.getElementById('input-area');
+    const gift = document.getElementById('gift');
+    const messageBox = document.getElementById('messageBox');
+    const titleText = document.getElementById('titleText');
+    const navButtons = document.getElementById('navButtons');
+    const friendPic = document.getElementById('friendPic');
+    const bgMusic = document.getElementById('bgMusic');
+
+    if (name) {
+      inputArea.style.display = 'none';
+      gift.style.display = 'block';
+    }
+
+    function generateLink() {
+      const inputName = document.getElementById('nameInput').value.trim();
+      if (inputName) {
+        const link = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(inputName)}`;
+        document.getElementById('generatedLink').href = link;
+        document.getElementById('generatedLink').innerText = link;
+        document.getElementById('linkBox').style.display = 'block';
+      }
+    }
+
+    gift.addEventListener('click', () => {
+      gift.style.display = 'none';
+      titleText.innerText = `🎉 Happy Birthday ${decodeURIComponent(name)}!`;
+      titleText.style.display = 'block';
+      messageBox.style.display = 'block';
+      navButtons.style.display = 'block';
+      friendPic.style.display = 'block';
+      showMessage();
+
+      // Start background music and loop
+      bgMusic.play().catch(()=>{});
+      bgMusic.addEventListener('ended', () => {
+        bgMusic.currentTime = 0;
+        bgMusic.play();
+      });
+
+      // Confetti animation
+      for (let i = 0; i < 100; i++) {
+        const confetti = document.createElement('div');
+        confetti.classList.add('confetti');
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 70%)`;
+        confetti.style.animationDuration = 2 + Math.random() * 2 + 's';
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 4000);
+      }
+    });
+
+    function typeMessage(text) {
+      clearInterval(typingInterval);
+      typingIndex = 0;
+      messageBox.innerText = "";
+      typingInterval = setInterval(() => {
+        if (typingIndex < text.length) {
+          messageBox.innerText += text.charAt(typingIndex);
+          typingIndex++;
+        } else {
+          clearInterval(typingInterval);
+        }
+      }, 50); // typing speed
+    }
+
+    function showMessage() {
+      typeMessage(messages[currentIndex]);
+    }
+
+    function nextMessage() {
+      if (currentIndex < messages.length - 1) {
+        currentIndex++;
+        showMessage();
+      }
+    }
+
+    function prevMessage() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        showMessage();
+      }
+    }
+  </script>
+
+</body>
+</html>
